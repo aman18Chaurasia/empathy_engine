@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Empathy Engine</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(to right, #6a11cb, #2575fc);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 100vh;
+        margin: 0;
+        padding: 40px 20px;
+        transition: background 0.5s ease;
+    }
+
+    h1 { font-size: 3rem; margin-bottom: 20px; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
+
+    form { background: rgba(255,255,255,0.1); padding: 20px 30px; border-radius: 15px;
+           box-shadow: 0 8px 16px rgba(0,0,0,0.3); width: 100%; max-width: 600px; }
+
+    textarea { width: 100%; padding: 12px; border-radius: 10px; border: none;
+               resize: none; font-size: 1rem; margin-bottom: 15px; }
+
+    input[type="submit"] { background: #ff6a00; color: #fff; border: none;
+                           padding: 12px 25px; font-size: 1.1rem; border-radius: 10px;
+                           cursor: pointer; transition: all 0.3s ease; }
+    input[type="submit"]:hover { background: #ff8c42; }
+
+    .result { margin-top: 30px; text-align: center; }
+    .result h3 { margin: 10px 0; font-size: 1.3rem; }
+    audio { margin-top: 10px; width: 100%; max-width: 400px; outline: none; }
+
+    footer { margin-top: 50px; font-size: 0.9rem; opacity: 0.7; }
+
+</style>
+</head>
+<body>
+<h1>🎤 Empathy Engine</h1>
+
+<form action="/speak" method="POST" id="speechForm">
+    <textarea id="textInput" name="text" rows="4" placeholder="Enter your text here..."></textarea>
+    <input type="submit" value="Generate Speech">
+</form>
+
+<div class="result" id="liveResult">
+    <h3 id="emotionDisplay"></h3>
+    <h3 id="intensityDisplay"></h3>
+</div>
+
+{% if audio %}
+<div class="result">
+    <audio controls autoplay>
+        <source src="{{ audio }}" type="audio/wav">
+    </audio>
+</div>
+{% endif %}
+
+<footer>Powered by Flask, PyTorch & Transformers | Hackathon Demo</footer>
+
+<script>
+const textInput = document.getElementById('textInput');
+const emotionDisplay = document.getElementById('emotionDisplay');
+const intensityDisplay = document.getElementById('intensityDisplay');
+
+textInput.addEventListener('input', async () => {
+    const text = textInput.value;
+    if (!text.trim()) {
+        emotionDisplay.textContent = '';
+        intensityDisplay.textContent = '';
+        document.body.style.background = 'linear-gradient(to right, #6a11cb, #2575fc)';
+        return;
+    }
+
+    const response = await fetch('/detect', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text})
+    });
+
+    const data = await response.json();
+    if (data.emotion) {
+        emotionDisplay.textContent = "Detected Emotion: " + data.emotion;
+        intensityDisplay.textContent = "Intensity: " + data.intensity;
+
+        // Change background based on emotion
+        let bg = 'linear-gradient(to right, #6a11cb, #2575fc)';
+        switch(data.emotion.toLowerCase()) {
+            case 'joy': bg = 'linear-gradient(to right, #f7971e, #ffd200)'; break;
+            case 'sadness': bg = 'linear-gradient(to right, #2c3e50, #3498db)'; break;
+            case 'anger': bg = 'linear-gradient(to right, #e52d27, #b31217)'; break;
+            case 'fear': bg = 'linear-gradient(to right, #8e2de2, #4a00e0)'; break;
+            case 'surprise': bg = 'linear-gradient(to right, #ffafbd, #ffc3a0)'; break;
+            case 'anxious': bg = 'linear-gradient(to right, #ff6a00, #ee0979)'; break;
+            default: bg = 'linear-gradient(to right, #6a11cb, #2575fc)';
+        }
+        document.body.style.background = bg;
+    }
+});
+</script>
+</body>
+</html>
