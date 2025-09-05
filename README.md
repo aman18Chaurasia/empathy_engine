@@ -114,7 +114,7 @@ MIT License
 ---
 
 ### ✅ Next Steps
-1. Push your **entire project folder** to GitHub.  
+1. Push your **entire project folder** to GitHub.   
 2. Make sure your **README.md is in the root**.  
 3. Include the **requirements.txt** and optionally **demo audio clips**.  
 4. Share the **GitHub repository URL** for submission.
